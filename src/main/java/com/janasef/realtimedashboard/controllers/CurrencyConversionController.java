@@ -1,5 +1,7 @@
 package com.janasef.realtimedashboard.controllers;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -11,12 +13,14 @@ import com.janasef.realtimedashboard.domain.CurrencyConversionEntry;
 
 @RestController
 public class CurrencyConversionController {
+	@Autowired
+	private KafkaTemplate<Object, Object> template;
 	
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	@PostMapping("api/currencyconversion/add")
 	void add(@RequestBody CurrencyConversionEntry entry) {
-		logger.trace(entry.toString());
+		this.template.send("currencyCountry", entry.getOriginatingCountry());
 	}
 	
 }
