@@ -1,15 +1,15 @@
 package com.janasef.realtimedashboard.component;
 
-import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.common.serialization.Serdes;
-import org.apache.kafka.streams.KeyValue;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.kafka.streams.StreamsBuilder;
-import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KStream;
-import org.apache.kafka.streams.kstream.Produced;
+import org.apache.kafka.streams.kstream.TimeWindows;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Component
 @Slf4j
@@ -17,20 +17,10 @@ public class App1 {
   @SuppressWarnings("unchecked")
   @Bean("app1StreamTopology")
   public KStream<String, String> startProcessing(@Qualifier("app1StreamBuilder") StreamsBuilder builder) {
-
-    /*final KStream<String, Long> toSquare = builder.stream("originating-country", Consumed.with(Serdes.String(), Serdes.Long()));
-    toSquare.map((key, value) -> { // do something with each msg, square the values in our case
-      return KeyValue.pair(key, value * value);
-    }).to("squared", Produced.with(Serdes.String(), Serdes.Long())); // send downstream to another topic
-
-    return toSquare;*/
-	  
-	  final KStream<String, String> toSquare = builder.stream("originating-country", Consumed.with(Serdes.String(), Serdes.String()));
-	    toSquare.map((key, value) -> { // do something with each msg, square the values in our case
-	      return KeyValue.pair(key, value + value);
-	    }).to("doubled-country", Produced.with(Serdes.String(), Serdes.String())); // send downstream to another topic
-
-	    return toSquare;
+	    KStream<String, String> source = builder.stream("originating-country");
+	    source.groupByKey().windowedBy(TimeWindows.of(TimeUnit.SECONDS.toMillis(10))).count()
+	    	.toStream((key, value) -> key.toString()).mapValues(count -> Long.toString(count)).to("country_summary");
+		return source;
   }
 
 }
