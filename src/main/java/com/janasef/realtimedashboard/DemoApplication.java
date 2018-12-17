@@ -20,5 +20,10 @@ public class DemoApplication {
 	public NewTopic topic() {
 		return new NewTopic("originating-country", 1, (short) 1);
 	}
+	
+	@Bean
+	public NewTopic topic2() {
+		return new NewTopic("doubled-country", 1, (short) 1);
+	}
 
 }
