@@ -20,7 +20,7 @@ public class CurrencyConversionController {
 	
 	@PostMapping("api/currencyconversion/add")
 	void add(@RequestBody CurrencyConversionEntry entry) {
-		this.template.send("currencyCountry", entry.getOriginatingCountry());
+		this.template.send("originating-country", entry.getOriginatingCountry());
 	}
 	
 }
